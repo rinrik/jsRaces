@@ -1,10 +1,17 @@
 const score = document.querySelector('.score'),
   start = document.querySelector('.start'),
+  start2 = document.querySelector('.start2'),
+  start3 = document.querySelector('.start3'),
   gameArea = document.querySelector('.gameArea'),
   car = document.createElement('div');
 car.classList.add('car');
 
+start2.style.top = start.offsetHeight;
+start3.style.top = start2.offsetHeight + start.offsetHeight;
+
 start.addEventListener('click', startGame);
+start2.addEventListener('click', startGame, (speed = 8));
+start3.addEventListener('click', startGame, (speed = 10));
 document.addEventListener('keydown', startRun);
 document.addEventListener('keyup', stopRun);
 /*Keys*/
@@ -27,9 +34,27 @@ function getQuantityElements(heightElement) {
   return document.documentElement.clientHeight / heightElement + 1;
 }
 
+/*save score*/
+function saveScore() {
+  let savedScore = setting.score;
+  localStorage.setItem('Score', JSON.stringify(savedScore));
+  savedScore = JSON.parse(localStorage.getItem('Score'));
+}
+
+function playAudio() {
+  let audio = new Audio(); // Создаём новый элемент Audio
+  audio.src = 'sound.mp3'; // Указываем путь к звуку "клика"
+  audio.autoplay = true; // Автоматически запускаем
+}
+
 /*Start Game */
 function startGame() {
+  console.log(speed);
   start.classList.add('hide');
+  start2.classList.add('hide');
+  start3.classList.add('hide');
+  gameArea.innerHTML = '';
+  playAudio();
   for (let i = 0; i < getQuantityElements(100); i++) {
     const line = document.createElement('div');
     line.classList.add('line');
@@ -51,8 +76,12 @@ function startGame() {
     enemy.style.top = enemy.y + 'px';
     gameArea.appendChild(enemy);
   }
+  setting.score = 0;
   setting.start = true;
   gameArea.appendChild(car);
+  car.style.left = gameArea.offsetWidth / 2 - car.offsetWidth / 2;
+  car.style.top = 'auto';
+  car.style.bottom = '10px';
   setting.x = car.offsetLeft;
   setting.y = car.offsetTop;
   requestAnimationFrame(playGame);
@@ -60,6 +89,8 @@ function startGame() {
 
 function playGame() {
   if (setting.start) {
+    setting.score += setting.speed;
+    score.innerHTML = `Score<br>` + setting.score;
     requestAnimationFrame(moveRoad);
     moveEnemy();
     moveRoad();
@@ -87,7 +118,6 @@ function playGame() {
 function startRun(event) {
   event.preventDefault();
   keys[event.key] = true;
-  console.log(event.key);
 }
 /*Stop Run */
 function stopRun(event) {
@@ -111,6 +141,32 @@ function moveRoad() {
 function moveEnemy() {
   let enemy = document.querySelectorAll('.enemy , .enemy2');
   enemy.forEach(function (item) {
+    let carRect = car.getBoundingClientRect();
+    let enemyRect = item.getBoundingClientRect();
+
+    if (
+      carRect.top <= enemyRect.bottom &&
+      carRect.right >= enemyRect.left &&
+      carRect.left <= enemyRect.right &&
+      carRect.bottom >= enemyRect.top
+    ) {
+      setting.start = false;
+      console.warn('DTP');
+      start.classList.remove('hide');
+      start2.classList.remove('hide');
+      start3.classList.remove('hide');
+      start.style.top = score.offsetHeight;
+      start2.style.top = score.offsetHeight + start.offsetHeight;
+      start3.style.top =
+        start2.offsetHeight + start.offsetHeight + score.offsetHeight;
+      if (localStorage.getItem('Score') < setting.score) {
+        alert('Позрадвляю! Вы побили рекорд.');
+        saveScore();
+      } else {
+        saveScore();
+      }
+    }
+
     item.y += setting.speed / 2;
     item.style.top = item.y + 'px';
     if (item.y >= document.documentElement.clientHeight) {

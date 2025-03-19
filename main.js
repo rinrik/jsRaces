@@ -9,6 +9,11 @@ car.classList.add('car');
 start2.style.top = start.offsetHeight;
 start3.style.top = start2.offsetHeight + start.offsetHeight;
 
+// Вызов getRequest() при загрузке страницы
+window.addEventListener('load', () => {
+  getRequest();
+});
+
 start.addEventListener('click', startGame);
 start2.addEventListener('click', startGame, (speed = 8));
 start3.addEventListener('click', startGame, (speed = 10));

@@ -47,6 +47,14 @@ function playAudio() {
   audio.autoplay = true; // Автоматически запускаем
 }
 
+//added for testing purposes
+function getRequest() {
+  fetch('https://gsddsfsdfdsf.com/spec.json')
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Ошибка:', error));
+}
+
 /*Start Game */
 function startGame() {
   console.log(speed);
